@@ -2,8 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 #[tauri::command]
-fn login(server: &str, username: &str, _password: &str) -> String {
-    format!("Logging in user {} to {}", username, server)
+fn login(server: &str, port: u16, username: &str, _password: &str) -> String {
+    format!("Logging in user {} to {}:{}", username, server, port)
 }
 
 fn main() {
