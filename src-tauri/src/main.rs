@@ -2,13 +2,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}!", name)
+fn login(server: &str, username: &str, _password: &str) -> String {
+    format!("Logging in user {} to {}", username, server)
 }
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![login])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
