@@ -2,13 +2,15 @@
 	import { invoke } from '@tauri-apps/api/tauri';
 
 	let server = '';
-	let port = 3389
+	let port = 3389;
 	let user = '';
 	let password = '';
 	let loginMsg = '';
 
 	async function login() {
-		loginMsg = await invoke('login', { server, port, username: user, password });
+		loginMsg = await invoke('login', { server, port, username: user, password })
+			.then((response) => console.log(response))
+			.catch((response) => console.error(response));
 	}
 </script>
 
@@ -22,14 +24,14 @@
 	</label>
 	<label>
 		<p>
-		Username
-		<input id="login-user" bind:value={user} />
+			Username
+			<input id="login-user" bind:value={user} />
 		</p>
 	</label>
 	<label>
 		<p>
-		Password
-		<input type="password" id="login-password" bind:value={password} />
+			Password
+			<input type="password" id="login-password" bind:value={password} />
 		</p>
 	</label>
 	<button on:click={login}>login</button>
