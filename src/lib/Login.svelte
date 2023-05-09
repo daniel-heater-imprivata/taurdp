@@ -1,20 +1,30 @@
 <script>
 	import { invoke } from '@tauri-apps/api/tauri';
+	import { goto } from '$app/navigation';
 
 	let server = '';
 	let port = 3389;
 	let user = '';
 	let password = '';
 	let loginMsg = '';
+	let errormsg = '';
 
 	async function login() {
 		loginMsg = await invoke('login', { server, port, username: user, password })
-			.then((response) => console.log(response))
-			.catch((response) => console.error(response));
+			.then((response) => {
+				console.log(response);
+				errormsg = '';
+				goto("/view")
+			})
+			.catch((response) => {
+				console.error(response);
+				errormsg = response;
+			});
 	}
 </script>
 
 <div>
+	<h2>Let's get connected!</h2>
 	<label>
 		<p>
 			RDP server:[port]
@@ -35,5 +45,5 @@
 		</p>
 	</label>
 	<button on:click={login}>login</button>
-	<p>{loginMsg}</p>
+	<h3 style="color: red">{errormsg}</h3>
 </div>

@@ -1,11 +1,11 @@
 [package]
-name = "hardpan"
+name = "taurdp"
 version = "0.1.0"
-description = "A Tauri App"
+description = "Tauri-based RDP client"
 authors = ["Daniel Heater"]
 license = "MIT"
 repository = ""
-default-run = "hardpan"
+default-run = "taurdp"
 edition = "2021"
 rust-version = "1.60"
 
