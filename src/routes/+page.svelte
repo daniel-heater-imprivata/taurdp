@@ -1,5 +1,5 @@
 <script>
-  import Login from '../lib/Login.svelte'
-</script>
+	import { goto } from '$app/navigation';
 
-<Login />
+	goto('/login');
+</script>
