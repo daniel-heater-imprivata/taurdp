@@ -20,14 +20,14 @@ pub struct Config {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-enum SecurityProtocol {
+pub enum SecurityProtocol {
     Ssl,
     Hybrid,
     HybridEx,
 }
 
 impl SecurityProtocol {
-    fn parse(security_protocol: SecurityProtocol) -> pdu::nego::SecurityProtocol {
+    pub fn parse(security_protocol: SecurityProtocol) -> pdu::nego::SecurityProtocol {
         match security_protocol {
             SecurityProtocol::Ssl => pdu::nego::SecurityProtocol::SSL,
             SecurityProtocol::Hybrid => pdu::nego::SecurityProtocol::HYBRID,
@@ -37,7 +37,7 @@ impl SecurityProtocol {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-enum KeyboardType {
+pub enum KeyboardType {
     IbmPcXt,
     OlivettiIco,
     IbmPcAt,
@@ -48,7 +48,7 @@ enum KeyboardType {
 }
 
 impl KeyboardType {
-    fn parse(keyboard_type: KeyboardType) -> ironrdp::pdu::gcc::KeyboardType {
+    pub fn parse(keyboard_type: KeyboardType) -> ironrdp::pdu::gcc::KeyboardType {
         match keyboard_type {
             KeyboardType::IbmEnhanced => ironrdp::pdu::gcc::KeyboardType::IbmEnhanced,
             KeyboardType::IbmPcAt => ironrdp::pdu::gcc::KeyboardType::IbmPcAt,
@@ -150,7 +150,7 @@ impl From<&Destination> for connector::ServerName {
 #[derive(Parser, Debug)]
 #[clap(author = "Devolutions", about = "Devolutions-IronRDP client")]
 #[clap(version, long_about = None)]
-struct Args {
+pub struct Args {
     /// A file with IronRDP client logs
     #[clap(short, long, value_parser, default_value_t = format!("{}.log", crate_name!()))]
     log_file: String,
@@ -164,7 +164,7 @@ struct Args {
 
     /// An optional target RDP server domain name
     #[clap(short, long, value_parser)]
-    domain: Option<String>,
+    pub domain: Option<String>,
 
     /// A target RDP server user password
     #[clap(short, long, value_parser)]
@@ -172,52 +172,52 @@ struct Args {
 
     /// Specify the security protocols to use
     #[clap(long, value_enum, value_parser, default_value_t = SecurityProtocol::Hybrid)]
-    security_protocol: SecurityProtocol,
+    pub security_protocol: SecurityProtocol,
 
     /// The keyboard type
     #[clap(long, value_enum, value_parser, default_value_t = KeyboardType::IbmEnhanced)]
-    keyboard_type: KeyboardType,
+    pub keyboard_type: KeyboardType,
 
     /// The keyboard subtype (an original equipment manufacturer-dependent value)
     #[clap(long, value_parser, default_value_t = 0)]
-    keyboard_subtype: u32,
+    pub keyboard_subtype: u32,
 
     /// The number of function keys on the keyboard
     #[clap(long, value_parser, default_value_t = 12)]
-    keyboard_functional_keys_count: u32,
+    pub keyboard_functional_keys_count: u32,
 
     /// The input method editor (IME) file name associated with the active input locale
     #[clap(long, value_parser, default_value_t = String::from(""))]
-    ime_file_name: String,
+    pub ime_file_name: String,
 
     /// Contains a value that uniquely identifies the client
     #[clap(long, value_parser, default_value_t = String::from(""))]
-    dig_product_id: String,
+    pub dig_product_id: String,
 
     /// Enable AVC444
     #[clap(long, group = "avc")]
-    avc444: bool,
+    pub avc444: bool,
 
     /// Enable H264
     #[clap(long, group = "avc")]
-    h264: bool,
+    pub h264: bool,
 
     /// Enable thin client
     #[clap(long)]
-    thin_client: bool,
+    pub thin_client: bool,
 
     /// Enable small cache
     #[clap(long)]
-    small_cache: bool,
+    pub small_cache: bool,
 
     /// Set required color depth. Currently only 32 and 16 bit color depths are supported
     #[clap(long)]
-    color_depth: Option<u32>,
+    pub color_depth: Option<u32>,
 
     /// Enabled capability versions. Each bit represents enabling a capability version
     /// starting from V8 to V10_7
     #[clap(long, value_parser = parse_hex, default_value_t = 0)]
-    capabilities: u32,
+    pub capabilities: u32,
 }
 
 impl Config {
@@ -292,12 +292,13 @@ impl Config {
                 height: DEFAULT_HEIGHT,
             },
             graphics,
+            client_build: 0,
             bitmap,
-            client_build: semver::Version::parse(env!("CARGO_PKG_VERSION"))
-                .map(|version| version.major * 100 + version.minor * 10 + version.patch)
-                .unwrap_or(0)
-                .pipe(u32::try_from)
-                .unwrap(),
+            // client_build: semver::Version::parse(env!("CARGO_PKG_VERSION"))
+            //     .map(|version| version.major * 100 + version.minor * 10 + version.patch)
+            //     .unwrap_or(0)
+            //     .pipe(u32::try_from)
+            //     .unwrap(),
             client_name: whoami::hostname(),
             // NOTE: hardcode this value like in freerdp
             // https://github.com/FreeRDP/FreeRDP/blob/4e24b966c86fdf494a782f0dfcfc43a057a2ea60/libfreerdp/core/settings.c#LL49C34-L49C70
