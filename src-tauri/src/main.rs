@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 // use ironrdp::connector;
-use anyhow::Context as _;
+// use anyhow::Context as _;
 use tauri::Manager;
 
 use taurdp::config::Config;
@@ -15,14 +15,10 @@ fn login(server: &str, port: u16, username: &str, password: &str) -> Result<Stri
 
     let log_file = "~/.taurdp.log".to_owned();
 
-    let mut config = Config::parse_args().unwrap(); //.context("CLI arguments parsing")
-                                                    // let config = match config {
-                                                    //     Some(_) =>
-                                                    //     Ok("Success ".to_owned() + &response)
-                                                    //     None() =>
-                                                    //     Err("Failed ".to_owned() + &response)
-
-    // };
+    let mut config = match Config::parse_args() {
+        Ok(config) => config,
+        Err(error) => return Err("Failed ".to_owned()),
+    };
 
     let destination = Destination {
         name: server.to_string(),
