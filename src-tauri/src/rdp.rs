@@ -8,6 +8,7 @@ use smallvec::SmallVec;
 use sspi::network_client::reqwest_network_client::RequestClientFactory;
 use tokio::net::TcpStream;
 use tokio::sync::mpsc;
+use anyhow::Error;
 // use winit::event_loop::EventLoopProxy;
 
 use crate::config::Config;
@@ -42,12 +43,17 @@ pub struct RdpClient {
     pub input_event_receiver: mpsc::UnboundedReceiver<RdpInputEvent>,
 }
 
+fn eventLoopTest() -> Result<RdpInputEvent,anyhow::Error> {
+    Ok(RdpInputEvent::Close)
+}
+
 impl RdpClient {
     pub async fn run(mut self) {
         loop {
             let (connection_result, framed) = match connect(&self.config).await {
-                Ok(result) => result,
+                Ok(result) => {println!("TESTING 4");result},
                 Err(_e) => {
+                    println!("TESTING 3");
                     // let _ = //self
                         // .event_loop_proxy
                         // .send_event(RdpOutputEvent::ConnectionFailure(e));
@@ -58,7 +64,7 @@ impl RdpClient {
             match active_session(
                 framed,
                 connection_result,
-                // &self.event_loop_proxy,
+                &eventLoopTest,
                 &mut self.input_event_receiver,
             )
             .await
@@ -68,12 +74,14 @@ impl RdpClient {
                     self.config.connector.desktop_size.height = height;
                 }
                 Ok(RdpControlFlow::TerminatedGracefully) => {
+                    println!("TESTING 1");
                     // let _ = self
                         // .event_loop_proxy
                         // .send_event(RdpOutputEvent::Terminated(Ok(())));
                     break;
                 }
                 Err(_e) => {
+                    println!("TESTING 2");
                     // let _ = self
                         // .event_loop_proxy
                         // .send_event(RdpOutputEvent::Terminated(Err(e)));
@@ -134,7 +142,7 @@ async fn connect(config: &Config) -> ConnectorResult<(ConnectionResult, Upgraded
 async fn active_session(
     mut framed: UpgradedFramed,
     connection_result: ConnectionResult,
-    // event_loop_proxy: &EventLoopProxy<RdpOutputEvent>,
+    event_loop_proxy: &dyn Fn() -> Result<RdpInputEvent,anyhow::Error> ,
     input_event_receiver: &mut mpsc::UnboundedReceiver<RdpInputEvent>,
 ) -> SessionResult<RdpControlFlow> {
     let mut image = DecodedImage::new(

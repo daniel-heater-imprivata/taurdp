@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use anyhow::Context as _;
 use ironrdp::connector;
 use ironrdp::pdu::gcc::KeyboardType;
 use ironrdp::pdu::nego::SecurityProtocol;
@@ -10,6 +11,7 @@ use whoami;
 
 use taurdp::config::Destination;
 use taurdp::rdp::{RdpClient, RdpInputEvent};
+use tokio::runtime;
 
 #[tauri::command]
 fn login(server: &str, port: u16, username: &str, password: &str) -> Result<String, String> {
@@ -64,6 +66,20 @@ fn login(server: &str, port: u16, username: &str, password: &str) -> Result<Stri
         config: tauri_config,
         input_event_receiver,
     };
+
+    let rt = runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .context("unable to create tokio runtime").unwrap();
+
+    //debug!("Start RDP thread");
+    std::thread::spawn(move || {
+        rt.block_on(client.run());
+    });
+
+    //debug!("Run GUI");
+    //gui.run(input_event_sender);
+
     if port == 3389 {
         Ok("Success ".to_owned() + &response)
     } else {
