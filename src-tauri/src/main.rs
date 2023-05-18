@@ -3,10 +3,14 @@
 
 use tauri::Manager;
 
+// use crate::config::Config;
+
 #[tauri::command]
 fn login(server: &str, port: u16, username: &str, _password: &str) -> Result<String, String> {
     let response = format!("logging in user {} to {}:{}", username, server, port);
 
+    // let config = Config;
+    // let client = RdpClient {
     if port == 3389 {
         Ok("Success ".to_owned() + &response)
     } else {
