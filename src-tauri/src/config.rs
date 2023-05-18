@@ -71,8 +71,8 @@ fn parse_hex(input: &str) -> Result<u32, ParseIntError> {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Destination {
-    name: String,
-    port: u16,
+    pub name: String,
+    pub port: u16,
 }
 
 impl Destination {
@@ -117,7 +117,10 @@ impl Destination {
     pub fn lookup_addr(&self) -> io::Result<std::net::SocketAddr> {
         use std::net::ToSocketAddrs as _;
 
-        let sockaddr = (self.name.as_str(), self.port).to_socket_addrs()?.next().unwrap();
+        let sockaddr = (self.name.as_str(), self.port)
+            .to_socket_addrs()?
+            .next()
+            .unwrap();
 
         Ok(sockaddr)
     }
@@ -233,7 +236,9 @@ impl Config {
         let username = if let Some(username) = args.username {
             username
         } else {
-            inquire::Text::new("Username:").prompt().context("Username prompt")?
+            inquire::Text::new("Username:")
+                .prompt()
+                .context("Username prompt")?
         };
 
         let password = if let Some(password) = args.password {
@@ -247,7 +252,9 @@ impl Config {
 
         let bitmap = if let Some(color_depth) = args.color_depth {
             if color_depth != 16 && color_depth != 32 {
-                anyhow::bail!("Invalid color depth. Only 16 and 32 bit color depths are supported.");
+                anyhow::bail!(
+                    "Invalid color depth. Only 16 and 32 bit color depths are supported."
+                );
             }
 
             Some(connector::BitmapConfig {
