@@ -56,6 +56,7 @@ impl GuiContext {
 
         let mut input_database = ironrdp::input::Database::new();
 
+        let _ = input_event_sender.send(RdpInputEvent::Close);
         /*
         event_loop.run(move |event, _, control_flow| {
             // *control_flow = ControlFlow::Wait;
