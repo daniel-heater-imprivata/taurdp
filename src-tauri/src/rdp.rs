@@ -9,19 +9,20 @@ use smallvec::SmallVec;
 use sspi::network_client::reqwest_network_client::RequestClientFactory;
 use tokio::net::TcpStream;
 use tokio::sync::mpsc;
+use tauri::{Window};
 // use winit::event_loop::EventLoopProxy;
 
 use crate::config::Config;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub enum RdpOutputEvent {
     Image {
         buffer: Vec<u32>,
         width: u16,
         height: u16,
     },
-    ConnectionFailure(connector::ConnectorError),
-    Terminated(SessionResult<()>),
+    //ConnectionFailure(connector::ConnectorError),
+    //Terminated(SessionResult<()>),
 }
 
 #[derive(Debug)]
@@ -41,6 +42,7 @@ pub struct RdpClient {
     pub config: Config,
     // pub event_loop_proxy: EventLoopProxy<RdpOutputEvent>,
     pub input_event_receiver: mpsc::UnboundedReceiver<RdpInputEvent>,
+    pub appwindow: Window
 }
 
 fn event_loop_test() -> Result<RdpInputEvent, anyhow::Error> {
@@ -69,6 +71,7 @@ impl RdpClient {
                 connection_result,
                 &event_loop_test,
                 &mut self.input_event_receiver,
+                &mut self.appwindow,
             )
             .await
             {
@@ -147,6 +150,7 @@ async fn active_session(
     connection_result: ConnectionResult,
     event_loop_proxy: &dyn Fn() -> Result<RdpInputEvent, anyhow::Error>,
     input_event_receiver: &mut mpsc::UnboundedReceiver<RdpInputEvent>,
+    appwindow: &mut Window,
 ) -> SessionResult<RdpControlFlow> {
     let mut image = DecodedImage::new(
         PixelFormat::RgbA32,
@@ -191,6 +195,15 @@ async fn active_session(
                                 })
                                 .map_err(|e| session::custom_err!("event_loop_proxy", e))?;
                             */
+                            appwindow.emit(
+                                "UPDATECANVAS",
+                                     RdpOutputEvent::Image {
+                                         buffer,
+                                         width: image.width(),
+                                         height: image.height(),
+                                },
+                            )
+                            .unwrap();
 
                         }
                         ActiveStageOutput::Terminate => break 'outer,

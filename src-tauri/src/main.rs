@@ -19,7 +19,7 @@ use taurdp::rdp::{RdpClient, RdpInputEvent};
 use tokio::runtime;
 
 #[tauri::command]
-fn login(server: &str, port: u16, username: &str, password: &str) -> Result<String, String> {
+fn login(server: &str, port: u16, username: &str, password: &str, appwindow: Window) -> Result<String, String> {
     let response = format!("logging in user {} to {}:{}", username, server, port);
 
     let log_file = "~/.taurdp.log".to_owned();
@@ -70,6 +70,7 @@ fn login(server: &str, port: u16, username: &str, password: &str) -> Result<Stri
     let client = RdpClient {
         config: tauri_config,
         input_event_receiver,
+        appwindow,
     };
 
     let rt = runtime::Builder::new_multi_thread()
