@@ -1,3 +1,4 @@
+use anyhow::Error;
 use ironrdp::connector::{ConnectionResult, ConnectorResult};
 use ironrdp::graphics::image_processing::PixelFormat;
 use ironrdp::pdu::input::fast_path::FastPathInputEvent;
@@ -8,7 +9,6 @@ use smallvec::SmallVec;
 use sspi::network_client::reqwest_network_client::RequestClientFactory;
 use tokio::net::TcpStream;
 use tokio::sync::mpsc;
-use anyhow::Error;
 // use winit::event_loop::EventLoopProxy;
 
 use crate::config::Config;
@@ -43,7 +43,7 @@ pub struct RdpClient {
     pub input_event_receiver: mpsc::UnboundedReceiver<RdpInputEvent>,
 }
 
-fn eventLoopTest() -> Result<RdpInputEvent,anyhow::Error> {
+fn event_loop_test() -> Result<RdpInputEvent, anyhow::Error> {
     Ok(RdpInputEvent::Close)
 }
 
@@ -51,12 +51,15 @@ impl RdpClient {
     pub async fn run(mut self) {
         loop {
             let (connection_result, framed) = match connect(&self.config).await {
-                Ok(result) => {println!("TESTING 4");result},
-                Err(_e) => {
-                    println!("TESTING 3");
+                Ok(result) => {
+                    println!("Connection succeeded");
+                    result
+                }
+                Err(e) => {
+                    println!("Connection failed {}", e);
                     // let _ = //self
-                        // .event_loop_proxy
-                        // .send_event(RdpOutputEvent::ConnectionFailure(e));
+                    // .event_loop_proxy
+                    // .send_event(RdpOutputEvent::ConnectionFailure(e));
                     break;
                 }
             };
@@ -64,7 +67,7 @@ impl RdpClient {
             match active_session(
                 framed,
                 connection_result,
-                &eventLoopTest,
+                &event_loop_test,
                 &mut self.input_event_receiver,
             )
             .await
@@ -74,17 +77,17 @@ impl RdpClient {
                     self.config.connector.desktop_size.height = height;
                 }
                 Ok(RdpControlFlow::TerminatedGracefully) => {
-                    println!("TESTING 1");
+                    println!("Session terminated");
                     // let _ = self
-                        // .event_loop_proxy
-                        // .send_event(RdpOutputEvent::Terminated(Ok(())));
+                    // .event_loop_proxy
+                    // .send_event(RdpOutputEvent::Terminated(Ok(())));
                     break;
                 }
-                Err(_e) => {
-                    println!("TESTING 2");
+                Err(e) => {
+                    println!("Active session returned error {}", e);
                     // let _ = self
-                        // .event_loop_proxy
-                        // .send_event(RdpOutputEvent::Terminated(Err(e)));
+                    // .event_loop_proxy
+                    // .send_event(RdpOutputEvent::Terminated(Err(e)));
                     break;
                 }
             }
@@ -142,7 +145,7 @@ async fn connect(config: &Config) -> ConnectorResult<(ConnectionResult, Upgraded
 async fn active_session(
     mut framed: UpgradedFramed,
     connection_result: ConnectionResult,
-    event_loop_proxy: &dyn Fn() -> Result<RdpInputEvent,anyhow::Error> ,
+    event_loop_proxy: &dyn Fn() -> Result<RdpInputEvent, anyhow::Error>,
     input_event_receiver: &mut mpsc::UnboundedReceiver<RdpInputEvent>,
 ) -> SessionResult<RdpControlFlow> {
     let mut image = DecodedImage::new(
