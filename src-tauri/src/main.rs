@@ -9,7 +9,7 @@ use ironrdp::connector;
 use ironrdp::pdu::gcc::KeyboardType;
 use ironrdp::pdu::nego::SecurityProtocol;
 use ironrdp::pdu::rdp::capability_sets::MajorPlatformType;
-use tauri::Manager;
+use tauri::{Manager, Window};
 use tokio::sync::mpsc;
 use whoami;
 
@@ -100,6 +100,25 @@ struct Payload {
     y: u32,
 }
 
+#[derive(Clone, serde::Serialize)]
+struct MessagePayload {
+    msg: String,
+}
+
+#[tauri::command]
+async fn handle_bitmaps(window: Window) {
+    loop {
+        window
+            .emit(
+                "UPDATECANVAS",
+                MessagePayload {
+                    msg: "Tauri is awesome!".into(),
+                },
+            )
+            .unwrap();
+    }
+}
+
 #[tauri::command]
 fn mouse_press(position: &str) {
     println!("mouse pressed at: {}", position);
@@ -121,7 +140,12 @@ fn main() -> anyhow::Result<()> {
             });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![login, mouse_press, keyboard_press])
+        .invoke_handler(tauri::generate_handler![
+            login,
+            mouse_press,
+            keyboard_press,
+            handle_bitmaps,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 

@@ -5,6 +5,8 @@ use tokio::sync::mpsc;
 // use winit::event_loop::{ControlFlow, EventLoop, EventLoopBuilder};
 // use winit::window::{Window, WindowBuilder};
 
+use std::time;
+
 use crate::rdp::{RdpInputEvent, RdpOutputEvent};
 
 pub struct GuiContext {
@@ -55,6 +57,13 @@ impl GuiContext {
         // let mut image_buffer = vec![0; usize::from(image_width) * usize::from(image_height)];
 
         let mut input_database = ironrdp::input::Database::new();
+
+        let _ = input_event_sender.send(RdpInputEvent::Resize {
+            width: 800,
+            height: 600,
+        });
+
+        std::thread::sleep(time::Duration::from_secs(13));
 
         let _ = input_event_sender.send(RdpInputEvent::Close);
         /*

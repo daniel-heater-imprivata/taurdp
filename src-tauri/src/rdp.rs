@@ -179,6 +179,7 @@ async fn active_session(
                                 })
                                 .collect();
 
+
                             /*
                             event_loop_proxy
                                 .send_event(RdpOutputEvent::Image {
@@ -212,6 +213,7 @@ async fn active_session(
 
                         // TODO: use the "auto-reconnect cookie": https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/15b0d1c9-2891-4adb-a45e-deb4aeeeab7c
 
+                        println!("Resize window to {}x{}", width, height);
                         info!(width, height, "resize event");
 
                         return Ok(RdpControlFlow::ReconnectWithNewSize { width, height })
@@ -234,6 +236,7 @@ async fn active_session(
                     }
                     RdpInputEvent::Close => {
                         // TODO: https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/27915739-8f77-487e-9927-55008af7fd68
+                        println!("Recieved request to close the session");
                         break 'outer;
                     }
                 }
