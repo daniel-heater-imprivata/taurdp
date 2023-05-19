@@ -63,7 +63,7 @@ impl GuiContext {
             height: 600,
         });
 
-        std::thread::sleep(time::Duration::from_secs(13));
+        std::thread::sleep(time::Duration::from_secs(60));
 
         let _ = input_event_sender.send(RdpInputEvent::Close);
         /*

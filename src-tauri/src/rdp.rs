@@ -159,8 +159,9 @@ async fn active_session(
     'outer: loop {
         tokio::select! {
             frame = framed.read_pdu() => {
+                println!("Got pdu!");
                 let (action, payload) = frame.map_err(|e| session::custom_err!("read frame", e))?;
-                trace!(?action, frame_length = payload.len(), "Frame received");
+                println!("Frame received");
 
                 let outputs = active_stage.process(&mut image, action, &payload)?;
 
@@ -168,6 +169,7 @@ async fn active_session(
                     match out {
                         ActiveStageOutput::ResponseFrame(frame) => framed.write_all(&frame).await.map_err(|e| session::custom_err!("write response", e))?,
                         ActiveStageOutput::GraphicsUpdate(_region) => {
+                            println!("Got GraphicsUpdate!");
                             let buffer: Vec<u32> = image
                                 .data()
                                 .chunks_exact(4)
@@ -189,6 +191,7 @@ async fn active_session(
                                 })
                                 .map_err(|e| session::custom_err!("event_loop_proxy", e))?;
                             */
+
                         }
                         ActiveStageOutput::Terminate => break 'outer,
                     }

@@ -85,7 +85,10 @@ fn login(server: &str, port: u16, username: &str, password: &str) -> Result<Stri
 
     let gui = GuiContext::init().unwrap(); //context("Unable to inialize GUI context")?;
     debug!("Run GUI");
-    gui.run(input_event_sender);
+    std::thread::spawn(move || {
+        gui.run(input_event_sender);
+    });
+    //gui.run(input_event_sender);
 
     if port == 3389 {
         Ok("Success ".to_owned() + &response)
@@ -107,7 +110,7 @@ struct MessagePayload {
 
 #[tauri::command]
 async fn handle_bitmaps(window: Window) {
-    loop {
+    //loop {
         window
             .emit(
                 "UPDATECANVAS",
@@ -116,7 +119,7 @@ async fn handle_bitmaps(window: Window) {
                 },
             )
             .unwrap();
-    }
+    //}
 }
 
 #[tauri::command]
