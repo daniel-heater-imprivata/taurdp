@@ -14,7 +14,7 @@ use tokio::sync::mpsc;
 use whoami;
 
 use taurdp::config::Destination;
-// use taurdp::gui;
+use taurdp::gui::GuiContext;
 use taurdp::rdp::{RdpClient, RdpInputEvent};
 use tokio::runtime;
 
@@ -66,7 +66,7 @@ fn login(server: &str, port: u16, username: &str, password: &str) -> Result<Stri
         connector,
     };
 
-    let (_input_event_sender, input_event_receiver) = RdpInputEvent::create_channel();
+    let (input_event_sender, input_event_receiver) = RdpInputEvent::create_channel();
     let client = RdpClient {
         config: tauri_config,
         input_event_receiver,
@@ -83,8 +83,9 @@ fn login(server: &str, port: u16, username: &str, password: &str) -> Result<Stri
         rt.block_on(client.run());
     });
 
-    // debug!("Run GUI");
-    // gui.run(input_event_sender);
+    let gui = GuiContext::init().unwrap(); //context("Unable to inialize GUI context")?;
+    debug!("Run GUI");
+    gui.run(input_event_sender);
 
     if port == 3389 {
         Ok("Success ".to_owned() + &response)
