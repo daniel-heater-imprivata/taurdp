@@ -1,6 +1,7 @@
 <script>
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { goto } from '$app/navigation';
+	import { appWindow } from '@tauri-apps/api/window';
 
 	let server = '';
 	let port = 3389;
@@ -10,7 +11,7 @@
 	let errormsg = '';
 
 	async function login() {
-		loginMsg = await invoke('login', { server, port, username: user, password })
+		loginMsg = await invoke('login', { server, port, username: user, password, appWindow })
 			.then((response) => {
 				console.log(response);
 				errormsg = '';
